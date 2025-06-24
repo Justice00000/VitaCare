@@ -5,13 +5,24 @@ import 'otp_verification.dart'; // Import the OTP Verification screen
 import 'login.dart';
 import 'profile.dart'; // Profile screen after Google Sign-In
 
-class SignUpScreen extends StatelessWidget {
-  SignUpScreen({super.key});
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  bool isLoading = false;
 
   Future<void> signUp(BuildContext context) async {
     if (_nameController.text.isEmpty ||
@@ -24,61 +35,45 @@ class SignUpScreen extends StatelessWidget {
       return;
     }
 
+    setState(() => isLoading = true);
+
     try {
-      // Register the user with Firebase Authentication
-      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      // Create Firebase user
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+              email: _emailController.text.trim(),
+              password: _passwordController.text.trim());
+
+      // Send OTP via your custom backend
+      final response = await http.post(
+        Uri.parse('https://function-09f0.onrender.com/send-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': _emailController.text.trim()}),
       );
 
-      // Send an email verification link to the user
-      await userCredential.user?.sendEmailVerification();
-
-      // Navigate to OTP Verification Screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => OtpVerificationScreen(
-            email: _emailController.text.trim(),
+      if (response.statusCode == 200) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => OtpVerificationScreen(
+              email: _emailController.text.trim(),
+            ),
           ),
-        ),
-      );
+        );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Verification email sent!')),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('OTP sent to email')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send OTP: ${response.body}')),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message ?? 'Registration failed')),
       );
-    }
-  }
-
-  Future<void> signInWithGoogle(BuildContext context) async {
-    try {
-      // Trigger the Google Sign-In process
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        // User canceled the Google Sign-In process
-        return;
-      }
-
-      // Authenticate with Firebase using the Google Sign-In credentials
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // Navigate to Profile screen after successful Google Sign-In
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const ProfileScreen()),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google Sign-In failed: $e')),
-      );
+    } finally {
+      setState(() => isLoading = false); // Stop spinner
     }
   }
 
@@ -90,7 +85,6 @@ class SignUpScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // App Logo
               Text(
                 'MEDI\nCARE++',
                 style: TextStyle(
@@ -103,15 +97,13 @@ class SignUpScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-
-              // Sign Up Text
               const Text(
                 'Sign Up',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 30),
 
-              // Full Name Input
+              // Full Name
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: TextField(
@@ -127,7 +119,7 @@ class SignUpScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Phone Number Input
+              // Phone
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: TextField(
@@ -143,7 +135,7 @@ class SignUpScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Email Input
+              // Email
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: TextField(
@@ -159,7 +151,7 @@ class SignUpScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // Password Input
+              // Password
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: TextField(
@@ -176,36 +168,23 @@ class SignUpScreen extends StatelessWidget {
               ),
               const SizedBox(height: 30),
 
-              // Sign Up Button
-              ElevatedButton(
-                onPressed: () => signUp(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00A86B),
-                  padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                child: const Text('Sign Up'),
-              ),
+              // Sign Up Button or Spinner
+              isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: () => signUp(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00A86B),
+                        padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: const Text('Sign Up'),
+                    ),
               const SizedBox(height: 20),
 
-              // Google Sign-In Button
-              ElevatedButton.icon(
-                onPressed: () => signInWithGoogle(context),
-                icon: const Icon(Icons.login, color: Colors.white),
-                label: const Text('Sign Up with Google'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Navigate to Log In
+              // Login redirect
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

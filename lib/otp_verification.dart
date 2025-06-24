@@ -1,16 +1,18 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'profile.dart'; // Assuming this is the post-verification screen
+import 'package:http/http.dart' as http;
+import 'dashboard_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
-  final String email; // Email passed from signup
+  final String email;
 
-  const OtpVerificationScreen({required this.email, super.key});
+  const OtpVerificationScreen({super.key, required this.email});
 
   @override
-  _OtpVerificationScreenState createState() => _OtpVerificationScreenState();
+  State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
@@ -20,18 +22,17 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final TextEditingController otpController4 = TextEditingController();
 
   late Timer _timer;
-  int _start = 120; // 2 minutes timer
-  double _opacity = 0.0; // Initial opacity
-  bool _isVerifying = false; // For showing loader during OTP verification
+  int _start = 120;
+  double _opacity = 0.0;
+  bool _isVerifying = false;
 
   @override
   void initState() {
     super.initState();
     startTimer();
-    // Fade in effect
     Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
-        _opacity = 1.0; // Fully visible after delay
+        _opacity = 1.0;
       });
     });
   }
@@ -49,25 +50,25 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   void startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_start == 0) {
-        setState(() {
-          timer.cancel();
-        });
+        setState(() => timer.cancel());
       } else {
-        setState(() {
-          _start--;
-        });
+        setState(() => _start--);
       }
     });
   }
 
   String get timerText {
-    int minutes = _start ~/ 60;
-    int seconds = _start % 60;
+    final minutes = _start ~/ 60;
+    final seconds = _start % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   Future<void> verifyOtp(BuildContext context) async {
-    String enteredOtp = "${otpController1.text}${otpController2.text}${otpController3.text}${otpController4.text}";
+    String enteredOtp = otpController1.text +
+        otpController2.text +
+        otpController3.text +
+        otpController4.text;
+
     if (enteredOtp.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter the complete OTP')),
@@ -75,20 +76,25 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       return;
     }
 
-    setState(() {
-      _isVerifying = true;
-    });
+    setState(() => _isVerifying = true);
 
     try {
-      // Simulate OTP verification logic
-      // Replace this with your backend API or Firebase OTP logic
-      if (enteredOtp == "1234") { // Dummy OTP for testing
+      final response = await http.post(
+        Uri.parse('https://function-09f0.onrender.com/verify-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': widget.email.trim(), 'otp': enteredOtp}),
+      );
+
+      if (response.statusCode == 200) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email verified!')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid OTP')),
+          SnackBar(content: Text('Invalid OTP: ${response.body}')),
         );
       }
     } catch (e) {
@@ -96,9 +102,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         SnackBar(content: Text('Verification failed: $e')),
       );
     } finally {
-      setState(() {
-        _isVerifying = false;
-      });
+      setState(() => _isVerifying = false);
     }
   }
 
@@ -106,20 +110,59 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     if (_start > 0) return;
 
     setState(() {
-      _start = 120; // Reset the timer
+      _start = 120;
       startTimer();
     });
 
-    // Replace this with your backend API or Firebase resend logic
-    try {
+    final response = await http.post(
+      Uri.parse('https://function-09f0.onrender.com/send-otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': widget.email.trim()}),
+    );
+
+    if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OTP resent successfully')),
       );
-    } catch (e) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to resend OTP: $e')),
+        SnackBar(content: Text('Failed to resend OTP: ${response.body}')),
       );
     }
+  }
+
+  Widget _otpTextField(TextEditingController controller, {bool isLast = false}) {
+    return SizedBox(
+      width: 50,
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        maxLength: 1,
+        textInputAction: isLast ? TextInputAction.done : TextInputAction.next,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) {
+          if (value.isNotEmpty) {
+            if (!isLast) {
+              FocusScope.of(context).nextFocus();
+            } else {
+              verifyOtp(context);
+            }
+          }
+        },
+        decoration: InputDecoration(
+          counterText: '',
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.black12),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Colors.green),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -131,10 +174,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            // Fade-out effect before going back
-            setState(() {
-              _opacity = 0.0; // Start fading out
-            });
+            setState(() => _opacity = 0.0);
             Future.delayed(const Duration(milliseconds: 300), () {
               Navigator.of(context).pop();
             });
@@ -142,10 +182,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         ),
         title: const Text(
           'OTP Verification',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -158,20 +195,17 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/images/verify_email-removebg-preview.png', // Replace with your image path
+                'assets/images/verify_email-removebg-preview.png',
                 height: 150,
               ),
               const SizedBox(height: 20),
               const Text(
                 'Verification',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Text(
-                'Enter the 4-digit code sent via the email ${widget.email}',
+                'Enter the 4-digit code sent to ${widget.email}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
@@ -182,7 +216,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   _otpTextField(otpController1),
                   _otpTextField(otpController2),
                   _otpTextField(otpController3),
-                  _otpTextField(otpController4),
+                  _otpTextField(otpController4, isLast: true),
                 ],
               ),
               const SizedBox(height: 20),
@@ -211,44 +245,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               _isVerifying
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
-                onPressed: () => verifyOtp(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00A86B),
-                  padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
+                      onPressed: () => verifyOtp(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00A86B),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 100, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: const Text(
+                        'Continue',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _otpTextField(TextEditingController controller) {
-    return SizedBox(
-      width: 50,
-      child: TextField(
-        controller: controller,
-        keyboardType: TextInputType.number,
-        textAlign: TextAlign.center,
-        maxLength: 1,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
-          counterText: '',
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(color: Colors.black12),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(color: Colors.green),
           ),
         ),
       ),

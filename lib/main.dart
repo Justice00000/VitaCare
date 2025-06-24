@@ -1,54 +1,30 @@
 // lib/main.dart
 
-// ignore_for_file: unused_import
-
 import 'dart:async';
 import 'package:flutter/foundation.dart'; // For checking web platform
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_web/firebase_core_web.dart'; // Required for web
+import 'firebase_options.dart';
 import 'package:medicare/signup.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:medicare/custom_bottom_nav_bar.dart';
+import 'package:medicare/splash_screen.dart';
 
 void main() async {
-  // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    if (kIsWeb) {
-      // Web-specific Firebase initialization
-      const firebaseConfig = FirebaseOptions(
-            apiKey: "AIzaSyC548u6Wrl9ICaNr3fklLMjVKUvay7rTSs",
-            authDomain: "medicare-e2d86.firebaseapp.com",
-            projectId: "medicare-e2d86",
-            storageBucket: "medicare-e2d86.firebasestorage.app",
-            messagingSenderId: "972867386906",
-            appId: "1:972867386906:web:a0f095d3878abfd2b2dba3",
-            measurementId: "G-FK3LR5XTFJ"
-
-      );
-      await Firebase.initializeApp(options: firebaseConfig);
-    } else {
-      // Default Firebase initialization for Android/iOS
-      await Firebase.initializeApp();
-    }
-
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform, // ✅ Use correct project across all platforms
+    );
     print("🔥 Firebase initialized successfully");
   } catch (e) {
     print("❌ Firebase initialization failed: $e");
   }
 
   runApp(const MyApp());
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:medicare/custom_bottom_nav_bar.dart';
-import 'package:medicare/splash_screen.dart';
-
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((_) {
-    runApp(const MyApp());
-  });
 }
 
 class MyApp extends StatelessWidget {
@@ -217,12 +193,7 @@ class WelcomeScreen extends StatelessWidget {
             ),
           ],
         ),
-      title: 'MediCare',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.white,
       ),
-      home: const SplashScreen(),
     );
   }
 }

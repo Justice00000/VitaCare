@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'signup.dart'; // Import the signup page
 import 'forgot_password.dart'; // Import the Forgot Password screen
-import 'profile.dart'; // Assuming this is the post-login screen
+import 'dashboard_screen.dart'; // Assuming this is the post-login screen
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -26,7 +26,7 @@ class LoginScreen extends StatelessWidget {
       );
       // Navigate to the profile screen on successful login
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -57,7 +57,7 @@ class LoginScreen extends StatelessWidget {
 
       // Navigate to the profile screen
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -1,79 +1,48 @@
 name: medicare
 description: "Your Health Partner - An app to connect health experts with patients for seamless healthcare solutions."
 
-# Prevent accidental publication to pub.dev
 publish_to: 'none'
 
-# Application versioning
 version: 1.0.0+1
 
-# Environment constraints
 environment:
   sdk: ">=3.5.1 <4.0.0"
 
-# Dependencies
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^3.8.0
-  firebase_auth: ^5.3.3
-  cloud_firestore: ^5.5.0
-  firebase_messaging: ^15.1.5
+  firebase_core: ^2.15.1
+  firebase_auth: ^4.10.1
+  cloud_firestore: ^4.9.0
+  firebase_messaging: ^14.6.7
+  google_sign_in: ^5.4.2
   cupertino_icons: ^1.0.8
   async: any
   collection: any
-  google_sign_in: ^5.4.2
+  http: ^1.4.0
 
-# Development dependencies
+dependency_overrides:
+  web: 0.5.0
+  firebase_core_web: 2.6.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
 
-# Flutter-specific configurations
 flutter:
   uses-material-design: true
-
   assets:
     - assets/images/doctor.png
     - assets/images/verify_email-removebg-preview.png
     - assets/images/profilepicture.png
-    - assets\images\verify_email-removebg-preview 1.png
-    - assets\images\verify_email-removebg-preview 1 (1).png
-    - assets\images\profile picture of person in glasses and orange shirt.png
-    - assets\images\medicarehero.jpg
-    - assets\images\avatar1.jpg
-    - assets\images\doctor.jpg
-    - assets\images\team2.png
-    - assets\images\pharmacy1.jpg
-    - assets\images\pharmacy2.jpg
-    - assets\images\hospital1.jpg
-    - assets\images\hospital2.jpg
-    - assets\images\Rectangle 7 (1).png
-    - assets\images\Rectangle 7.png
-    
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/to/resolution-aware-images
-
-  # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/to/asset-from-package
-
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package
+    - assets/images/medicarehero.jpg
+    - assets/images/avatar1.jpg
+    - assets/images/doctor.jpg
+    - assets/images/team2.png
+    - assets/images/pharmacy1.jpg
+    - assets/images/pharmacy2.jpg
+    - assets/images/hospital1.jpg
+    - assets/images/hospital2.jpg
+    - assets/images/Rectangle 7 (1).png
+    - assets/images/Rectangle 7.png

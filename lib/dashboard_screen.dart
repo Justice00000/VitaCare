@@ -1,6 +1,7 @@
 // ignore_for_file: unused_import, library_prefixes
 
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:medicare/profile.dart';
 import 'package:medicare/profile_screen.dart' as profileScreenFile;
 import 'package:medicare/reminders_screen.dart';
@@ -8,8 +9,32 @@ import 'package:medicare/hospitals_screen.dart'; // Import for HospitalsClinicSc
 import 'package:medicare/pharmacies_screen.dart'; // Import for PharmaciesScreen
 import 'package:medicare/appointment_screen.dart'; // Import for AppointmentScreen
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  String userName = "there";
+  String userEmail = "email";
+
+  @override
+  void initState() {
+    super.initState();
+    getUserDetails();
+  }
+
+  void getUserDetails() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && user.email != null) {
+      setState(() {
+        userEmail = user.email!;
+        userName = user.email!.split('@')[0];
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,26 +92,26 @@ class DashboardScreen extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
+            DrawerHeader(
+              decoration: const BoxDecoration(
                 color: Colors.teal,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  CircleAvatar(
+                  const CircleAvatar(
                     radius: 30,
                     backgroundImage: AssetImage("assets/images/avatar1.jpg"),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Text(
-                    'Joshua Alana',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
+                    userName,
+                    style: const TextStyle(color: Colors.white, fontSize: 20),
                   ),
                   Text(
-                    'josh@gmail.com',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                    userEmail,
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
               ),
@@ -172,18 +197,18 @@ class DashboardScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              const Column(
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Welcome Joshua!",
-                                    style: TextStyle(
+                                    "Welcome $userName!",
+                                    style: const TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
                                   ),
-                                  Text(
+                                  const Text(
                                     "How is it going?",
                                     style: TextStyle(
                                       color: Colors.white70,
