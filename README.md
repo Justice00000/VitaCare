@@ -1,9 +1,9 @@
-# Medicare++: Advanced Healthcare Appointment Management System
+# VitaCare: Advanced Healthcare Appointment Management System
 
 ## Project Overview
-Medicare++ is a comprehensive healthcare appointment management system developed with Flutter, designed to revolutionize the way patients connect with healthcare providers. Our platform streamlines the medical appointment booking process while providing an intuitive and seamless user experience.
+VitaCare is a comprehensive healthcare appointment management system developed with Flutter, designed to revolutionise the way patients connect with healthcare providers. Our platform streamlines the medical appointment booking process while providing an intuitive and seamless user experience.
 
-![Medicare++ Logo](assets/images/logo.png)
+![VitaCare Logo](assets/images/logo.png)
 
 ## 🎯 Core Features
 
@@ -110,21 +110,11 @@ Medicare++ is a comprehensive healthcare appointment management system developed
 - Notification permissions
 - Calendar access
 
-## 👥 Project Contributors
-
-### Development Team
-- **Joshua Alana** - *Project Lead & Backend Development*
-- **Theodora** - *UI/UX Design & Frontend Development*
-- **Latjor** - *Frontend Development & State Management*
-- **Jamillah** - *Database Architecture & API Integration*
-- **Wilson** - *Testing & Quality Assurance*
-- **Justice** - *Mobile Development & Performance Optimization*
-
 ### Contact Information
 For support or inquiries:
-- Email: support@medicareplus.com
-- Website: www.medicareplus.com
-- Phone: [Contact Number]
+- Email: support@vitacare.com
+- Website: www.vitacare.com
+- Phone: [+2348137717783]
 
 ## 🔄 Version History
 
@@ -144,13 +134,13 @@ For support or inquiries:
 
 ### Best Practices
 1. **Profile Completion**
-   - Fill all medical history details
+   - Fill in all medical history details
    - Keep emergency contacts updated
    - Upload relevant medical documents
 
 2. **Appointment Booking**
    - Book appointments at least 24 hours in advance
-   - Check provider availability calendar
+   - Check the provider's availability calendar
    - Set reminder preferences
    - Add notes for specific requirements
 
@@ -170,7 +160,7 @@ For support or inquiries:
 2. **Booking Issues**
    - Verify selected time slot
    - Check payment method
-   - Update app to latest version
+   - Update the app to the latest version
 
 3. **Notification Problems**
    - Check notification permissions
@@ -194,7 +184,7 @@ For support or inquiries:
 ## 🌟 Feedback & Support
 
 ### Getting Help
-- In-app help center
+- In-app help centre
 - FAQ section
 - Live chat support
 - Email support
@@ -234,10 +224,10 @@ Users can submit feature requests through:
 - Improved patient communication
 
 ## License
-Medicare++ is released under the MIT License. See the LICENSE file for more details.
+VitaCare is released under the MIT License. See the LICENSE file for more details.
 
 ---
 
-© 2024 Medicare++. All Rights Reserved.
+© 2024 VitaCare. All Rights Reserved.
 
-*Developed by Team 14 - Making Healthcare Accessible*
+*Developed by VitaCare Team - Making Healthcare Accessible*
